@@ -168,7 +168,7 @@ curve31 = p31.plot(data1[2],pen = (2,3),name = 'acc[z]')
 curve32 = p32.plot(data2[2],pen = (2,3),name = 'gyr[z]')
 curve33 = p33.plot(data3[2],pen = (2,3),name = 'mag[z]')
 
-com = 'COM3'
+com = 'COM9'
 speed = 19200
 start = time.time()
 try:

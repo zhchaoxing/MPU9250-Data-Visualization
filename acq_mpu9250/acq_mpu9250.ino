@@ -33,7 +33,7 @@ MPU9250 AGM; // Accelero Gyro Magneto
 
 void setup()
 {
-  Wire.begin();
+Wire.begin(D1, D2);
   // TWBR = 12;  // 400 kbit/sec I2C speed
   Serial.begin(19200);
   
@@ -49,12 +49,12 @@ void setup()
   Serial.print(" I should be "); Serial.println(0x71, HEX);*/
 
 
-  if (c == 0x73) // WHO_AM_I should always be 0x68
+  if (c == 0x71) // WHO_AM_I should always be 0x68
   {
     //Serial.println("MPU9250 is online...");
 
     // Start by performing self test and reporting values
-    AGM.MPU9250SelfTest(AGM.SelfTest);
+    AGM.MPU9250SelfTest(AGM.selfTest);
 
     // Calibrate gyro and accelerometers, load biases in bias registers
     AGM.calibrateMPU9250(AGM.gyroBias, AGM.accelBias);
@@ -72,7 +72,7 @@ void setup()
 
 
     // Get magnetometer calibration from AK8963 ROM
-    AGM.initAK8963(AGM.magCalibration);
+    AGM.initAK8963(AGM.factoryMagCalibration);
     // Initialize device for active mode read of magnetometer
     //Serial.println("AK8963 initialized for active data mode....");
     if (SerialDebug)
@@ -116,22 +116,24 @@ void loop()
     AGM.getMres();
     // User environmental x-axis correction in milliGauss, should be
     // automatically calculated
-    AGM.magbias[0] = +470.;
+    AGM.magBias[0] = +470.;
     // User environmental x-axis correction in milliGauss TODO axis??
-    AGM.magbias[1] = +120.;
+    AGM.magBias[1] = +120.;
     // User environmental x-axis correction in milliGauss
-    AGM.magbias[2] = +125.;
+    AGM.magBias[2] = +125.;
 
     // Calculate the magnetometer values in milliGauss
     // Include factory calibration per data sheet and user environmental
     // corrections
     // Get actual magnetometer value, this depends on scale being set
-    AGM.mx = (float)AGM.magCount[0]*AGM.mRes*AGM.magCalibration[0] -
-               AGM.magbias[0];
-    AGM.my = (float)AGM.magCount[1]*AGM.mRes*AGM.magCalibration[1] -
-               AGM.magbias[1];
-    AGM.mz = (float)AGM.magCount[2]*AGM.mRes*AGM.magCalibration[2] -
-               AGM.magbias[2];
+    
+  //AGM.magCalMPU9250(AGM.magBias, AGM.magScale);
+    AGM.mx = (float)AGM.magCount[0]*AGM.mRes*AGM.factoryMagCalibration[0] -
+               AGM.magBias[0];
+    AGM.my = (float)AGM.magCount[1]*AGM.mRes*AGM.factoryMagCalibration[1] -
+               AGM.magBias[1];
+    AGM.mz = (float)AGM.magCount[2]*AGM.mRes*AGM.factoryMagCalibration[2] -
+               AGM.magBias[2];
   } // if (readByte(MPU9250_ADDRESS, INT_STATUS) & 0x01)
 
   // Must be called before updating quaternions!
